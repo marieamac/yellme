@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        transcript: { text: text },
+        transcript: { text },
         features: {
           sentiment_analysis: {},
           summarization: {}
@@ -25,16 +25,26 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
+    const responseText = await response.text(); // ← vemos el texto crudo de la respuesta
 
-    if (!response.ok) {
-      return res.status(response.status).json({ error: data.error || 'AssemblyAI API error' });
+    console.log('Raw response from AssemblyAI:', responseText);
+
+    try {
+      const data = JSON.parse(responseText);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: data.error || 'AssemblyAI API error' });
+      }
+      return res.status(200).json(data);
+    } catch (jsonError) {
+      return res.status(500).json({
+        error: 'Invalid JSON received from AssemblyAI',
+        details: responseText
+      });
     }
-
-    res.status(200).json(data);
 
   } catch (error) {
     console.error('Catch error:', error);
-    res.status(500).json({ error: 'Something went wrong while processing your request' });
+    res.status(500).json({ error: 'Server error: ' + error.message });
   }
 }
+
