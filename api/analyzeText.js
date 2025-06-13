@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const { text } = req.body;
 
   try {
-    const response = const response = await fetch('https://api.assemblyai.com/v2/analyze', {
+    const response = await fetch('https://api.assemblyai.com/v2/analyze', {
       method: 'POST',
       headers: {
         'Authorization': '130872bc2c04401982daf1e28fb47b3a',
@@ -24,11 +24,19 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    res.status(200).json(data);
+
+    // ✅ LOG para debug
+    console.log('AssemblyAI response:', data);
+
+    if (response.ok) {
+      res.status(200).json(data);
+    } else {
+      res.status(response.status).json({ error: data });
+    }
 
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Something went wrong while processing your request' });
+    console.error('Error en el servidor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
 
