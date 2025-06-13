@@ -25,7 +25,6 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // ✅ LOG para debug
     console.log('AssemblyAI response:', data);
 
     if (response.ok) {
@@ -36,7 +35,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error en el servidor:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    // 👇 Esto te muestra el error exacto
+    res.status(500).json({ error: error.message || 'Error interno del servidor' });
   }
 }
-
