@@ -2,8 +2,32 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST requests are allowed' });
   }
-  
-  // Esto solo regresa un mensaje simple para probar que la función está activa y recibe el POST bien
-  res.status(200).json({ message: 'La función analyzeText.js está funcionando correctamente' });
-}
 
+  const { text } = req.body;
+
+  try {
+    const response = await fetch('https://api.assemblyai.com/v2/ai/analyze', {
+      method: 'POST',
+      headers: {
+        'Authorization': '130872bc2c04401982daf1e28fb47b3a',  // Tu API Key aquí
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        transcript: {
+          text: text
+        },
+        features: {
+          sentiment_analysis: {},
+          summarization: {}
+        }
+      })
+    });
+
+    const data = await response.json();
+    res.status(200).json(data);
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Something went wrong while processing your request' });
+  }
+}
