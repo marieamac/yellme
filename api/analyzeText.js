@@ -6,10 +6,10 @@ export default async function handler(req, res) {
   const { text } = req.body;
 
   try {
-    const response = await fetch('https://api.assemblyai.com/v2/analyze', {
+    const response = await fetch('https://api.assemblyai.com/v2/ai/analyze', {
       method: 'POST',
       headers: {
-        'Authorization': '130872bc2c04401982daf1e28fb47b3a',
+        'Authorization': '130872bc2c04401982daf1e28fb47b3a',  // <- Tu API Key de Assembly
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -25,8 +25,6 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    console.log('AssemblyAI response:', data);
-
     if (response.ok) {
       res.status(200).json(data);
     } else {
@@ -34,8 +32,7 @@ export default async function handler(req, res) {
     }
 
   } catch (error) {
-    console.error('Error en el servidor:', error);
-    // 👇 Esto te muestra el error exacto
-    res.status(500).json({ error: error.message || 'Error interno del servidor' });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
