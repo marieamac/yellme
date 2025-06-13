@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const { text } = req.body;
 
   try {
-    const response = await fetch('https://api.assemblyai.com/v2/ai/analyze', {
+    const response = const response = await fetch('https://api.assemblyai.com/v2/analyze', {
       method: 'POST',
       headers: {
         'Authorization': '130872bc2c04401982daf1e28fb47b3a',
