@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.assemblyai.com/v2/ai/analyze', {
       method: 'POST',
       headers: {
-        'Authorization': '130872bc2c04401982daf1e28fb47b3a',
+        'Authorization': '4a57658e552c4206849da79cd79eb24a', // ← Reemplaza esto con tu API KEY nueva
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({
-        error: 'AssemblyAI returned an error',
+      return res.status(500).json({
+        error: 'Invalid JSON received from AssemblyAI',
         details: data
       });
     }
