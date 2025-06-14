@@ -5,17 +5,19 @@ export default async function handler(req, res) {
 
   const { text } = req.body;
 
+  if (!text) {
+    return res.status(400).json({ error: 'No text provided in request body' });
+  }
+
   try {
     const response = await fetch('https://api.assemblyai.com/v2/ai/analyze', {
       method: 'POST',
       headers: {
-        'Authorization': '4a57658e552c4206849da79cd79eb24a', // ← Reemplaza esto con tu API KEY nueva
+        'Authorization': '4a57658e552c4206849da79cd79eb24a',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        transcript: {
-          text: text
-        },
+        transcript: { text: text },
         features: {
           sentiment_analysis: {},
           summarization: {}
@@ -26,16 +28,20 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(500).json({
-        error: 'Invalid JSON received from AssemblyAI',
+      // Devuelve el error de AssemblyAI si lo hay
+      return res.status(response.status).json({
+        error: 'AssemblyAI returned an error',
+        status: response.status,
         details: data
       });
     }
 
-    res.status(200).json(data);
+    return res.status(200).json(data);
 
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Something went wrong while processing your request' });
+    console.error('Unexpected error:', error);
+    return res.status(500).json({ error: 'Unexpected error in the server', details: error.message });
   }
 }
+
+
