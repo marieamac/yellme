@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     const audioBuffer = await getRawBody(req);
-
+    console.log("🟡 Audio recibido. Tamaño:", audioBuffer.length);
     const response = await fetch('https://api.assemblyai.com/v2/upload', {
       method: 'POST',
       headers: {
@@ -34,5 +34,6 @@ export default async function handler(req, res) {
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor', details: error.message });
+    console.error("❌ ERROR en uploadRecording:", error);
   }
 }
