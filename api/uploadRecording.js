@@ -5,35 +5,45 @@ export const config = {
 };
 
 import { Readable } from 'stream';
+import formidable from 'formidable';
+import fs from 'fs';
 
 export default async function handler(req, res) {
- res.setHeader("Access-Control-Allow-Origin", "*");
-   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST method is allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
+  const form = new formidable.IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error parsing the file' });
     }
 
-    const audioBuffer = Buffer.concat(chunks);
+    const file = files.file;
+    const fileStream = fs.createReadStream(file[0].filepath);
 
-    const response = await fetch('https://api.assemblyai.com/v2/upload', {
-      method: 'POST',
-      headers: {
-        authorization: '4a57658e552c4206849da79cd79eb24a',
-        'transfer-encoding': 'chunked',
-      },
-      body: Readable.from(audioBuffer),
-      duplex: "half"
-    });
+    try {
+      const response = await fetch('https://api.assemblyai.com/v2/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': '4a57658e552c4206849da79cd79eb24a',
+          'Transfer-Encoding': 'chunked',
+        },
+        body: fileStream,
+        duplex: 'half',
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Upload failed', details: err.message });
-  }
+      if (!response.ok) {
+        return res.status(500).json({ error: 'Upload failed', details: data });
+      }
+
+      res.status(200).json(data);
+
+    } catch (error) {
+      res.status(500).json({ error: 'Server error', details: error.message });
+    }
+  });
 }
