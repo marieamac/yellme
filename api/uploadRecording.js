@@ -1,3 +1,6 @@
+import { Readable } from 'stream';
+import getRawBody from 'raw-body';
+
 export const config = {
   api: {
     bodyParser: false,
@@ -9,21 +12,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const chunks = [];
-  for await (const chunk of req) {
-    chunks.push(chunk);
-  }
-
-  const audioBuffer = Buffer.concat(chunks);
-
   try {
+    const audioBuffer = await getRawBody(req);
+
     const response = await fetch('https://api.assemblyai.com/v2/upload', {
       method: 'POST',
       headers: {
         'Authorization': '4a57658e552c4206849da79cd79eb24a',
         'Transfer-Encoding': 'chunked',
       },
-      body: audioBuffer,
+      body: Readable.from(audioBuffer),
       duplex: 'half',
     });
 
