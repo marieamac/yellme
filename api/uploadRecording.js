@@ -27,6 +27,7 @@ export default async function handler(req, res) {
         'transfer-encoding': 'chunked',
       },
       body: Readable.from(audioBuffer),
+      duplex: "half"
     });
 
     const data = await response.json();
