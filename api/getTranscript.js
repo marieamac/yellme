@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.assemblyai.com/v2/transcript', {
       method: 'POST',
       headers: {
-        'Authorization': 'TU_API_KEY_DE_ASSEMBLY',
+        'Authorization': '4a57658e552c4206849da79cd79eb24a',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
