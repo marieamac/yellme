@@ -7,7 +7,8 @@ export const config = {
 import { Readable } from 'stream';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+ res.setHeader("Access-Control-Allow-Origin", "*");
+   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST method is allowed' });
   }
 
