@@ -1,4 +1,15 @@
 export default async function handler(req, res) {
+  // ✅ Habilitar CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // ✅ Manejar preflight (CORS)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // ✅ Solo aceptar POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST requests are allowed' });
   }
@@ -64,12 +75,12 @@ export default async function handler(req, res) {
     const supabaseData = await supabaseRes.json();
 
     return res.status(200).json({
-      message: 'Transcript guardado en Supabase',
+      message: 'Transcript saved in Supabase',
       transcript: completedTranscript.text,
       supabase_id: supabaseData?.[0]?.id || null
     });
-
   } catch (error) {
-    return res.status(500).json({ error: 'Server error', details: error.message });
+    console.error("❌ Error in processRecording:", error);
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 }
