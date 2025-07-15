@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Voice Recorder</title>
+  </head>
+  <body>
+    <h2>🎙️ Voice Recorder</h2>
+    <button id="startBtn">▶️ Start Recording</button>
+    <button id="stopBtn" disabled>⏹️ Stop</button>
+    <p id="status"></p>
+    <p id="resultText"></p>
+
+    <script>
+      let mediaRecorder;
+      let audioChunks = [];
+
+      const startBtn = document.getElementById('startBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const statusText = document.getElementById('status');
+
+      startBtn.onclick = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'audio/webm;codecs=opus'
+          });
+
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('file', audioBlob, 'recording.webm');
+
+            statusText.textContent = '🔄 Uploading audio...';
+
+            try {
+              const response = await fetch('https://yellme.vercel.app/api/uploadRecording', {
+                method: 'POST',
+                body: formData
+              });
+
+              const result = await response.json();
+
+              if (!result.upload_url) {
+                statusText.textContent = '⚠️ Audio upload failed.';
+                return;
+              }
+
+              statusText.textContent = '✅ Audio uploaded: ' + result.upload_url;
+
+              // Procesar el audio
+              const processResponse = await fetch('https://yellme.vercel.app/api/processRecording', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ upload_url: result.upload_url, user_id: 'user123' })
+              });
+
+              const processResult = await processResponse.json();
+
+              document.getElementById('resultText').textContent =
+                '📥 Processed result: ' + JSON.stringify(processResult);
+
+            } catch (err) {
+              console.error('❌ Upload error:', err);
+              statusText.textContent = '❌ Error uploading audio.';
+            }
+          };
+
+          mediaRecorder.start();
+          statusText.textContent = '🎙️ Recording...';
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+        } catch (err) {
+          console.error('🎙️ Microphone error:', err);
+          statusText.textContent = '❌ Microphone access error.';
+        }
+      };
+
+      stopBtn.onclick = () => {
+        mediaRecorder.stop();
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      };
+    </script>
+  </body>
+</html>
